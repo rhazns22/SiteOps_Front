@@ -1,0 +1,160 @@
+/* Badges */
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-received {
+  background-color: #f1f3f2;
+  color: var(--text-secondary);
+}
+
+.badge-progress {
+  background-color: var(--status-progress-bg);
+  color: var(--status-progress);
+}
+
+.badge-review {
+  background-color: var(--status-review-bg);
+  color: var(--status-review);
+}
+
+.badge-done {
+  background-color: var(--status-done-bg);
+  color: var(--status-done);
+}
+
+.badge-danger {
+  background-color: var(--status-danger-bg);
+  color: var(--status-danger);
+}
+
+/* Priority Badge */
+.priority-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.priority-low {
+  background-color: #eef3f0;
+  color: #07844e;
+}
+
+.priority-medium {
+  background-color: #f4f6f5;
+  color: #69716d;
+}
+
+.priority-high {
+  background-color: #fff0f0;
+  color: #ef4444;
+}
+
+/* Buttons */
+.primary-btn {
+  background-color: var(--primary);
+  color: var(--surface);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.outline-btn {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.outline-btn:hover {
+  background-color: var(--background);
+}
+
+/* Metric Cards */
+.metric-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: #07844e80;
+}
+
+.metric-card.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.metric-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.metric-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.metric-card:nth-child(1) .metric-icon { background-color: #f3f4f6; color: #4b5563; }
+.metric-card:nth-child(2) .metric-icon { background-color: var(--status-progress-bg); color: var(--status-progress); }
+.metric-card:nth-child(3) .metric-icon { background-color: var(--status-review-bg); color: var(--status-review); }
+.metric-card:nth-child(4) .metric-icon { background-color: var(--status-done-bg); color: var(--status-done); }
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.metric-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}

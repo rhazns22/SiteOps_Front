@@ -1,0 +1,202 @@
+.dashboard-container {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-header-row {
+  margin-bottom: 8px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dashboard-kpis {
+  display: flex;
+  gap: 16px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+}
+
+.urgent-requests-card,
+.dashboard-activities-card,
+.dashboard-chart-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.view-all-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.dashboard-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  background-color: #fcfdfc;
+}
+
+.proj-cell {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.title-cell {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.date-cell.urgent {
+  color: var(--status-danger);
+  font-weight: 600;
+}
+
+.db-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.db-badge.progress {
+  background-color: var(--status-progress-bg);
+  color: var(--status-progress);
+}
+
+.db-badge.received {
+  background-color: #f1f3f2;
+  color: var(--text-secondary);
+}
+
+/* Timeline elements dashboard styling */
+.db-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeline-event {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.event-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  position: relative;
+  z-index: 2;
+}
+
+.event-icon::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 4px;
+  width: 2px;
+  height: 50px;
+  background-color: var(--border);
+  z-index: 1;
+}
+
+.timeline-event:last-child .event-icon::after {
+  display: none;
+}
+
+.dot-progress { background-color: var(--status-progress); box-shadow: 0 0 0 3px var(--status-progress-bg); }
+.dot-review { background-color: var(--status-review); box-shadow: 0 0 0 3px var(--status-review-bg); }
+.dot-done { background-color: var(--status-done); box-shadow: 0 0 0 3px var(--status-done-bg); }
+
+.event-content {
+  flex: 1;
+}
+
+.event-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.event-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+/* SVG Chart wrapper */
+.chart-canvas-wrapper {
+  margin-top: 16px;
+  position: relative;
+}
+
+.custom-bar-chart {
+  width: 100%;
+  height: auto;
+}
+
+.chart-legends {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legend-dot.req { background-color: #1677ff; }
+.legend-dot.done { background-color: #16845c; }

@@ -1,0 +1,212 @@
+.notifications-container {
+  display: flex;
+  height: calc(100vh - 72px);
+  width: 100%;
+}
+
+.notif-main-panel {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.notif-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.notif-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.timeline-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.notif-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notif-card-item {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.notif-card-item.unread {
+  border-left: 4px solid var(--primary);
+  box-shadow: 0 4px 12px rgba(7, 132, 78, 0.03);
+}
+
+.notif-card-item.read {
+  opacity: 0.8;
+}
+
+.notif-icon-col {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.notif-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.notif-indicator-dot.assignment { background-color: var(--status-progress); }
+.notif-indicator-dot.comment { background-color: var(--status-warning); }
+.notif-indicator-dot.review { background-color: var(--status-review); }
+.notif-indicator-dot.done { background-color: var(--status-done); }
+.notif-indicator-dot.danger { background-color: var(--status-danger); }
+
+.notif-content-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notif-top-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.notif-project {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.notif-time {
+  color: var(--text-muted);
+}
+
+.notif-item-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.notif-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.notif-user {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Settings Sidebar */
+.notif-settings-panel {
+  width: 320px;
+  height: calc(100vh - 72px);
+  background-color: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-section.border-top {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+.settings-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.settings-title.font-small {
+  font-size: 14px;
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.toggle-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.checkbox-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
