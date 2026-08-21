@@ -104,33 +104,35 @@ export const Login: React.FC = () => {
           </form>
 
           <div className="login-footer">
-            <div style={{ marginTop: '12px', fontSize: '13px', color: '#667085', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-              <span>테스트 계정 선택 (이메일 자동 입력):</span>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <button
-                  type="button"
-                  onClick={() => setEmail('admin@siteops.demo')}
-                  style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
-                >
-                  어드민 (ADMIN)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEmail('worker@siteops.demo')}
-                  style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
-                >
-                  작업자 (WORKER)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEmail('client@siteops.demo')}
-                  style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
-                >
-                  고객사 (CLIENT)
-                </button>
+            {import.meta.env.DEV && (
+              <div style={{ marginBottom: '16px', fontSize: '13px', color: '#667085', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <span>테스트 계정 선택 (이메일 자동 입력):</span>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setEmail('admin@siteops.demo')}
+                    style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    어드민 (ADMIN)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEmail('worker@siteops.demo')}
+                    style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    작업자 (WORKER)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEmail('client@siteops.demo')}
+                    style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    고객사 (CLIENT)
+                  </button>
+                </div>
               </div>
-            </div>
-            <div style={{ marginTop: '12px' }}>
+            )}
+            <div>
               <span>처음이신가요? </span>
               <a href="#invite" className="invite-link">초대 링크로 시작하세요</a>
             </div>
