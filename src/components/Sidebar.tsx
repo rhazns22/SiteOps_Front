@@ -1,5 +1,6 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   FileText,
   LayoutDashboard,
@@ -8,8 +9,11 @@ import {
   Bell,
   Settings,
   UserCheck,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from 'lucide-react';
+import { dashboardApi } from '../lib/api';
+import { useAuth } from '../context/useAuth';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -18,6 +22,27 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentProject }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const summaryQuery = useQuery({
+    queryKey: ['dashboard-summary'],
+    queryFn: dashboardApi.summary,
+    enabled: Boolean(user)
+  });
+
+  const unreadCount = summaryQuery.data?.unreadNotifications ?? 0;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const roleLabel =
+    user?.role === 'ADMIN' ? '관리자' :
+    user?.role === 'WORKER' ? '작업자' : '고객';
+
   return (
     <aside className="app-sidebar">
       <div className="logo-container">
@@ -87,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentProject }) => {
         >
           <Bell size={18} />
           <span>알림</span>
-          <span className="unread-badge">3</span>
+          {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
         </NavLink>
 
         <NavLink
@@ -108,13 +133,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentProject }) => {
           <ChevronDown size={16} color="#69716d" />
         </div>
 
-        <div className="user-profile-trigger">
-          <div className="avatar">이</div>
+        <div
+          className="user-profile-trigger"
+          onClick={() => setShowProfileMenu(!showProfileMenu)}
+          style={{ position: 'relative', cursor: 'pointer' }}
+        >
+          <div className="avatar">{user?.name ? user.name[0] : 'U'}</div>
           <div className="user-info">
-            <span className="user-name">이준호</span>
-            <span className="user-role">관리자</span>
+            <span className="user-name">{user?.name ?? '사용자'}</span>
+            <span className="user-role">{roleLabel}</span>
           </div>
           <ChevronDown size={16} color="#69716d" />
+
+          {showProfileMenu && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: 0,
+                right: 0,
+                marginBottom: '8px',
+                backgroundColor: '#fff',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                padding: '4px',
+                zIndex: 100
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#D92D20',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  borderRadius: '6px'
+                }}
+              >
+                <LogOut size={16} />
+                로그아웃
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </aside>

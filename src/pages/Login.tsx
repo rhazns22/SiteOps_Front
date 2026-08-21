@@ -2,19 +2,21 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
-import { apiErrorMessage, authApi, authStorage } from '../lib/api';
+import { apiErrorMessage, authApi } from '../lib/api';
+import { useAuth } from '../context/useAuth';
 import './Login.css';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('admin@siteops.demo');
-  const [password, setPassword] = useState('demo1234');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const loginMutation = useMutation({
     mutationFn: () => authApi.login(email, password),
     onSuccess: ({ accessToken, user }) => {
-      authStorage.set(accessToken, user);
+      login(accessToken, user);
       navigate('/requests');
     }
   });
@@ -103,21 +105,28 @@ export const Login: React.FC = () => {
 
           <div className="login-footer">
             <div style={{ marginTop: '12px', fontSize: '13px', color: '#667085', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-              <span>테스트 계정 선택:</span>
+              <span>테스트 계정 선택 (이메일 자동 입력):</span>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button
                   type="button"
-                  onClick={() => { setEmail('admin@siteops.demo'); setPassword('demo1234'); }}
+                  onClick={() => setEmail('admin@siteops.demo')}
                   style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
                 >
-                  어드민 (admin@siteops.demo)
+                  어드민 (ADMIN)
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setEmail('admin@admin.com'); setPassword('demo1234'); }}
+                  onClick={() => setEmail('worker@siteops.demo')}
                   style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
                 >
-                  어드민 (admin@admin.com)
+                  작업자 (WORKER)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEmail('client@siteops.demo')}
+                  style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
+                >
+                  고객사 (CLIENT)
                 </button>
               </div>
             </div>

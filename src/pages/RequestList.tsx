@@ -3,9 +3,10 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { StatusBadge, PriorityBadge, PrimaryButton, OutlineButton } from '../components/Common';
-import { apiErrorMessage, authStorage, dashboardApi, projectApi, requestApi, uploadApi, userApi } from '../lib/api';
+import { apiErrorMessage, dashboardApi, projectApi, requestApi, uploadApi, userApi } from '../lib/api';
 import type { ApiRequest } from '../lib/api';
 import { mapApiProject, mapApiRequest, uiStatusToApi } from '../lib/mappers';
+import { useAuth } from '../context/useAuth';
 import './RequestList.css';
 
 export const RequestList: React.FC = () => {
@@ -15,7 +16,7 @@ export const RequestList: React.FC = () => {
   const projectFilter = searchParams.get('project') || 'all';
 
   const queryClient = useQueryClient();
-  const currentUser = authStorage.user();
+  const { user: currentUser } = useAuth();
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
@@ -154,11 +155,9 @@ export const RequestList: React.FC = () => {
     reviewMutation.mutate({ requestId: selectedRaw.id, decision });
   };
 
-  const canWork =
-    selectedRaw &&
-    (currentUser?.role === 'ADMIN' || (currentUser?.role === 'WORKER' && selectedRaw.assigneeId === currentUser.id));
-
-  const canReview = selectedRaw && (currentUser?.role === 'ADMIN' || currentUser?.role === 'CLIENT');
+  const canAssign = Boolean(selectedRaw && currentUser?.role === 'ADMIN' && selectedRaw.status !== 'COMPLETED');
+  const canWork = Boolean(selectedRaw && currentUser?.role === 'WORKER' && selectedRaw.assigneeId === currentUser.id && selectedRaw.status !== 'COMPLETED');
+  const canReview = Boolean(selectedRaw && currentUser?.role === 'CLIENT' && selectedRaw.status === 'REVIEW_REQUESTED');
 
   return (
     <div className="request-list-container">
@@ -394,7 +393,7 @@ export const RequestList: React.FC = () => {
               </div>
             </div>
 
-            {currentUser?.role === 'ADMIN' && selectedRaw && (
+            {canAssign && (
               <div className="drawer-section">
                 <h3 className="section-title">담당자 배정</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>

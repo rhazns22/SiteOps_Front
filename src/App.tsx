@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Login from './pages/Login';
@@ -9,12 +10,40 @@ import CustomerReview from './pages/CustomerReview';
 import Dashboard from './pages/Dashboard';
 import ProjectList from './pages/ProjectList';
 import Notifications from './pages/Notifications';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false
+    }
+  }
+});
+
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--background)', color: 'var(--text-secondary)', fontSize: '14px' }}>
+        인증 정보를 확인하고 있습니다...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
-  
-  // States passed to Sidebar / Header
   const [currentProject, setCurrentProject] = useState('아워테이블');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -35,28 +64,39 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   );
 };
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   return (
-    <BrowserRouter>
-      <LayoutWrapper>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/requests" element={<RequestList />} />
-          <Route path="/new-request" element={<NewRequest />} />
-          <Route path="/customer-review" element={<CustomerReview />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/projects" element={<ProjectList />} />
-          <Route path="/notifications" element={<Notifications />} />
-          
-          {/* Fallback routes */}
-          <Route path="/clients" element={<div style={{ padding: '32px' }}><h2>클라이언트 목록 (준비 중)</h2></div>} />
-          <Route path="/users" element={<div style={{ padding: '32px' }}><h2>사용자 관리 (준비 중)</h2></div>} />
-          <Route path="/settings" element={<div style={{ padding: '32px' }}><h2>설정 (준비 중)</h2></div>} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </LayoutWrapper>
-    </BrowserRouter>
+    <LayoutWrapper>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/requests" element={<ProtectedRoute><RequestList /></ProtectedRoute>} />
+        <Route path="/new-request" element={<ProtectedRoute><NewRequest /></ProtectedRoute>} />
+        <Route path="/customer-review" element={<ProtectedRoute><CustomerReview /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/projects" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        
+        {/* Fallback routes */}
+        <Route path="/clients" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>클라이언트 목록 (준비 중)</h2></div></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>사용자 관리 (준비 중)</h2></div></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>설정 (준비 중)</h2></div></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </LayoutWrapper>
   );
 };
+
+export const App: React.FC = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
+
 export default App;

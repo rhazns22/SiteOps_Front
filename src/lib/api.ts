@@ -241,6 +241,10 @@ export const requestApi = {
   async addComment(requestId: string, content: string) {
     const { data } = await api.post<ApiRequest>(`/requests/${requestId}/comments`, { content });
     return data;
+  },
+  async addPin(requestId: string, pin: { xPercent: number; yPercent: number; content: string; sortOrder?: number }) {
+    const { data } = await api.post<ApiRequest>(`/requests/${requestId}/pins`, pin);
+    return data;
   }
 };
 
