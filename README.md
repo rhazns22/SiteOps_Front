@@ -45,51 +45,19 @@ SiteOps는 웹사이트 문제 요청, 화면 피드백 핀(Pin) 지정, 진행 
 
 ---
 
-## 💡 개발자를 위한 꿀팁 & 아키텍처 패턴 (Developer Pro-Tips)
+## 💡 개발자 꿀팁 & 패턴 장단점 (Developer Pro-Tips & Trade-offs)
 
-### 1. Axios 인터셉터를 통한 JWT 토큰 자동 주입 및 인증 세션 관리
-`src/lib/api.ts`에서 Axios 인터셉터를 활용해 모든 API 요청 헤더에 Authorization JWT 토큰을 자동으로 주입하고, `401 Unauthorized` 예외 시 자동으로 로컬 세션을 정돈합니다.
+### 1. Axios Interceptor 토큰 자동 주입 (`src/lib/api.ts`)
+- **장점**: 모든 API 요청에 JWT 헤더 자동 포함 및 401 세션 만료 일괄 처리.
+- **단점/고려사항**: 외부 API 호출 시 토큰 유출 방지를 위한 BaseURL 조건 체크 필요.
 
-```typescript
-// src/lib/api.ts
-export const api = axios.create({ baseURL: '/api/v1' });
+### 2. React Query `invalidateQueries` 캐시 동기화
+- **장점**: 데이터 수정(Mutation) 즉시 새로고침 없이 최신 UI 상태 유지.
+- **단점/고려사항**: 잦은 호출 시 API 재요청 증가 (필요 시 Optimistic Update 적용 권장).
 
-api.interceptors.request.use((config) => {
-  const token = authStorage.getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-```
-
-### 2. React Query의 무효화(`invalidateQueries`)를 통한 실시간 UI 상태 동기화
-요청 상태 변경이나 피드백 생성 시 `onSuccess` 콜백에서 즉시 관련 캐시 쿼리를 무효화하여 새로고침 없이 즉각적인 UI 업데이트를 보장합니다.
-
-```typescript
-const queryClient = useQueryClient();
-
-const updateStatusMutation = useMutation({
-  mutationFn: ({ id, status }: { id: string; status: RequestStatus }) =>
-    requestApi.updateStatus(id, status),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['requests'] });
-    queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-  }
-});
-```
-
-### 3. 화면 상대 좌표 기반의 가변 핀(Pin) 렌더링 패턴
-이미지 위 핀의 위치를 절대 픽셀(px) 대신 비율 퍼센트(`x%`, `y%`)로 저장하여 다양한 화면 해상도에서도 핀의 위치가 왜곡되지 않고 정확히 배치됩니다.
-
-```tsx
-<div 
-  className="pin-marker" 
-  style={{ left: `${pin.xPercentage}%`, top: `${pin.yPercentage}%` }}
->
-  <span className="pin-number">{index + 1}</span>
-</div>
-```
+### 3. 상대 퍼센트(`%`) 기반 피드백 핀(Pin) 좌표
+- **장점**: 다양한 해상도/반응형 환경에서도 원본 이미지 대비 정확한 위치 유지.
+- **단점/고려사항**: 이미지 비율 변형 시 핀 오차 방지를 위해 `aspect-ratio` 고정 필요.
 
 ---
 
