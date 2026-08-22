@@ -167,9 +167,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const requestUrl = String(error.config?.url ?? '');
+      if (requestUrl.includes('/auth/kakao/exchange')) {
+        return Promise.reject(error);
+      }
+
       localStorage.removeItem(tokenKey);
       localStorage.removeItem(userKey);
-      if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/invite')) {
+      const isStandaloneAuthPage =
+        window.location.pathname === '/login' ||
+        window.location.pathname.startsWith('/invite') ||
+        window.location.pathname.startsWith('/auth/kakao/callback');
+
+      if (!isStandaloneAuthPage) {
         window.location.assign('/login');
       }
     }
@@ -186,6 +196,9 @@ export const authStorage = {
   clear() {
     localStorage.removeItem(tokenKey);
     localStorage.removeItem(userKey);
+  },
+  hasSession() {
+    return Boolean(localStorage.getItem(tokenKey) && localStorage.getItem(userKey));
   },
   user(): ApiUser | null {
     const raw = localStorage.getItem(userKey);

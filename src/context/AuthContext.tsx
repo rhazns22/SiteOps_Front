@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { authApi, authStorage } from '../lib/api';
 import type { ApiUser } from '../lib/api';
@@ -32,16 +32,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = (token: string, newUser: ApiUser) => {
+  const login = useCallback((token: string, newUser: ApiUser) => {
     authStorage.set(token, newUser);
     setUser(newUser);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     authStorage.clear();
     queryClient.clear();
     setUser(null);
-  };
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, logout }}>
