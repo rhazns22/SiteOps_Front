@@ -8,10 +8,37 @@ export type ApiNotificationType = 'ASSIGNED' | 'COMMENT' | 'REVIEW_REQUESTED' | 
 
 export interface ApiUser {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   role: ApiRole;
   clientId?: string | null;
+}
+
+export interface ApiInvitation {
+  id: string;
+  role: ApiRole;
+  clientId?: string | null;
+  clientName?: string | null;
+  projectId?: string | null;
+  projectName?: string | null;
+  invitedEmail?: string | null;
+  createdByName?: string;
+  status: 'PENDING' | 'USED' | 'EXPIRED' | 'REVOKED';
+  expiresAt: string;
+  usedAt?: string | null;
+  revokedAt?: string | null;
+  createdAt: string;
+}
+
+export interface ApiInvitationPreview {
+  valid: boolean;
+  role: ApiRole;
+  clientId?: string | null;
+  clientName?: string | null;
+  projectId?: string | null;
+  projectName?: string | null;
+  invitedEmail?: string | null;
+  expiresAt: string;
 }
 
 export interface ApiProject {
@@ -121,8 +148,10 @@ export interface BottleneckItem {
 const tokenKey = 'siteops.accessToken';
 const userKey = 'siteops.user';
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1';
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1'
+  baseURL: apiBaseUrl
 });
 
 api.interceptors.request.use((config) => {
@@ -140,7 +169,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem(tokenKey);
       localStorage.removeItem(userKey);
-      if (window.location.pathname !== '/login') {
+      if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/invite')) {
         window.location.assign('/login');
       }
     }
@@ -183,6 +212,57 @@ export const authApi = {
   async me() {
     const { data } = await api.get<{ user: ApiUser }>('/auth/me');
     return data.user;
+  },
+  async kakaoExchange(code: string) {
+    const { data } = await api.post<{ accessToken: string; user: ApiUser }>('/auth/kakao/exchange', {
+      code
+    });
+    return data;
+  },
+  getKakaoStartUrl(intentToken?: string, returnTo?: string) {
+    let url = `${apiBaseUrl}/auth/kakao/start`;
+    const params = new URLSearchParams();
+    if (intentToken) params.append('intentToken', intentToken);
+    if (returnTo) params.append('returnTo', returnTo);
+    const str = params.toString();
+    if (str) url += `?${str}`;
+    return url;
+  }
+};
+
+export const invitationApi = {
+  async preview(token: string) {
+    const { data } = await api.post<ApiInvitationPreview>('/invitations/preview', { token });
+    return data;
+  },
+  async createIntent(token: string) {
+    const { data } = await api.post<{
+      intentToken: string;
+      role: ApiRole;
+      clientName?: string | null;
+      projectName?: string | null;
+      invitedEmail?: string | null;
+      expiresAt: string;
+    }>('/invitations/intents', { token });
+    return data;
+  },
+  async create(body: {
+    role: ApiRole;
+    clientId?: string;
+    projectId?: string;
+    invitedEmail?: string;
+    expiresInDays?: number;
+  }) {
+    const { data } = await api.post<{ invitation: ApiInvitation; inviteUrl: string }>('/invitations', body);
+    return data;
+  },
+  async list() {
+    const { data } = await api.get<{ invitations: ApiInvitation[] }>('/invitations');
+    return data.invitations;
+  },
+  async revoke(invitationId: string) {
+    const { data } = await api.post<{ success: boolean }>(`/invitations/${invitationId}/revoke`);
+    return data;
   }
 };
 

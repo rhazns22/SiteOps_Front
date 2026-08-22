@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
 import { apiErrorMessage, authApi } from '../lib/api';
@@ -7,11 +7,21 @@ import { useAuth } from '../context/useAuth';
 import './Login.css';
 
 export const Login: React.FC = () => {
-  const [email, setEmail] = useState('admin@siteops.demo');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [urlErrorMessage, setUrlErrorMessage] = useState<string | null>(null);
+
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      setUrlErrorMessage(decodeURIComponent(errorParam));
+    }
+  }, [searchParams]);
 
   const loginMutation = useMutation({
     mutationFn: () => authApi.login(email, password),
@@ -23,29 +33,65 @@ export const Login: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    setUrlErrorMessage(null);
     loginMutation.mutate();
   };
 
+  const handleKakaoLogin = () => {
+    window.location.href = authApi.getKakaoStartUrl();
+  };
+
+  const handleInviteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    alert('관리자에게 초대 링크를 요청해 주세요.');
+  };
+
   return (
-    <div className="login-wrapper">
+    <div className="login-page">
       <div className="login-left">
-        <div className="login-brand">
-          <div className="brand-logo">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+        <div className="login-content">
+          <div className="login-brand">
+            <svg viewBox="0 0 160 40" width="160" height="40" fill="none" className="brand-svg-logo">
+              {/* Hexagon 'S' Symbol */}
+              <path
+                d="M18 4L30 11V25L18 32L6 25V11L18 4Z"
+                fill="#07844E"
+              />
+              <path
+                d="M22 12C22 12 14 13.5 14 17C14 20.5 22 19.5 22 23C22 26.5 14 28 14 28"
+                stroke="#FFFFFF"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* SiteOps Wordmark */}
+              <text
+                x="42"
+                y="26"
+                fill="#101828"
+                fontSize="24"
+                fontWeight="800"
+                fontFamily="Pretendard, sans-serif"
+                letterSpacing="-0.5"
+              >
+                SiteOps
+              </text>
             </svg>
           </div>
-          <span className="brand-name">SiteOps</span>
-        </div>
 
-        <div className="login-form-container">
           <h1 className="login-title">웹사이트 운영을 더 명확하게</h1>
-          
-          <button type="button" className="google-btn">
-            <svg className="google-icon" viewBox="0 0 24 24" width="18" height="18">
-              <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.69 5.69 0 0 1 8.24 12.8a5.69 5.69 0 0 1 5.75-5.714c1.393 0 2.545.495 3.426 1.312l3.076-3.077C18.625 3.633 16.273 2.8 13.99 2.8a9.2 9.2 0 0 0-9.2 9.2 9.2 9.2 0 0 0 9.2 9.2c5.302 0 9.278-3.731 9.278-9.278 0-.616-.055-1.116-.145-1.637H12.24z"/>
+
+          {urlErrorMessage && (
+            <div className="login-error-banner">
+              {urlErrorMessage}
+            </div>
+          )}
+
+          <button type="button" className="kakao-btn" onClick={handleKakaoLogin}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#191919">
+              <path d="M12 3C6.477 3 2 6.48 2 10.772c0 2.766 1.83 5.19 4.605 6.602l-1.173 4.316c-.1.368.307.662.617.453l5.068-3.342c.294.032.593.048.883.048 5.523 0 10-3.48 10-7.772C22 6.48 17.523 3 12 3z" />
             </svg>
-            Google로 계속하기
+            <span>카카오로 계속하기</span>
           </button>
 
           <div className="login-separator">
@@ -54,95 +100,89 @@ export const Login: React.FC = () => {
 
           <form onSubmit={handleLogin} className="login-form">
             <div className="form-group">
-              <label>이메일</label>
-              <div className="input-with-icon">
-                <svg className="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
-                <input
-                  type="email"
-                  placeholder="이메일을 입력하세요"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+              <label htmlFor="email">이메일</label>
+              <input
+                id="email"
+                type="email"
+                className="form-input"
+                placeholder="이메일을 입력하세요"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
 
             <div className="form-group">
-              <label>비밀번호</label>
-              <div className="input-with-icon">
-                <svg className="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
+              <label htmlFor="password">비밀번호</label>
+              <div className="password-input-wrapper">
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
+                  className="form-input"
                   placeholder="비밀번호를 입력하세요"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
                   className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label="비밀번호 표시 토글"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {loginMutation.isError && (
-              <p style={{ color: '#D92D20', fontSize: '13px', marginTop: '-4px' }}>
+              <p className="form-error-msg">
                 {apiErrorMessage(loginMutation.error)}
               </p>
             )}
 
             <button type="submit" className="login-submit-btn" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? '로그인 중...' : '로그인'}
+              {loginMutation.isPending ? '로그인 중...' : '이메일로 로그인'}
             </button>
           </form>
 
-          <div className="login-footer">
-            {import.meta.env.DEV && (
-              <div style={{ marginBottom: '16px', fontSize: '13px', color: '#667085', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                <span>테스트 계정 선택 (이메일 자동 입력):</span>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={() => setEmail('admin@siteops.demo')}
-                    style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
-                  >
-                    어드민 (ADMIN)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEmail('worker@siteops.demo')}
-                    style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
-                  >
-                    작업자 (WORKER)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEmail('client@siteops.demo')}
-                    style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #D0D5DD', background: '#F9FAFB', fontSize: '12px', cursor: 'pointer' }}
-                  >
-                    고객사 (CLIENT)
-                  </button>
-                </div>
+          {import.meta.env.DEV && (
+            <div className="demo-account-selector">
+              <span className="demo-label">테스트 계정 선택 (이메일 자동 입력):</span>
+              <div className="demo-btn-group">
+                <button
+                  type="button"
+                  onClick={() => { setEmail('admin@siteops.demo'); setPassword('demo1234'); }}
+                >
+                  어드민 (ADMIN)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('worker@siteops.demo'); setPassword('demo1234'); }}
+                >
+                  작업자 (WORKER)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('client@siteops.demo'); setPassword('demo1234'); }}
+                >
+                  고객사 (CLIENT)
+                </button>
               </div>
-            )}
-            <div>
-              <span>처음이신가요? </span>
-              <a href="#invite" className="invite-link">초대 링크로 시작하세요</a>
             </div>
+          )}
+
+          <div className="invite-footer">
+            <span>처음이신가요? </span>
+            <a href="#invite" onClick={handleInviteClick} className="invite-link">
+              초대 링크로 시작하세요
+            </a>
           </div>
         </div>
       </div>
 
       <div className="login-right">
         <div className="right-bg-curves">
-          {/* Subtle curved lines matching ChatGPT Image 2026년 8월 14일 오전 03_44_22.png */}
           <div className="curve curve-1"></div>
           <div className="curve curve-2"></div>
         </div>
@@ -155,7 +195,6 @@ export const Login: React.FC = () => {
             변경 사항을 한눈에 확인하세요.
           </p>
 
-          {/* Browser mockup visual */}
           <div className="browser-mockup">
             <div className="browser-header">
               <div className="window-dots">
@@ -171,7 +210,7 @@ export const Login: React.FC = () => {
                 <div className="browser-tab-link">문의하기</div>
               </div>
             </div>
-            
+
             <div className="browser-body">
               <div className="mockup-content">
                 <div className="mockup-text-section">
@@ -179,15 +218,19 @@ export const Login: React.FC = () => {
                   <p>사용자 중심의 디자인과 기술로 비즈니스의 성장을 돕습니다.</p>
                   <button type="button" className="mockup-cta">자세히 보기</button>
                 </div>
-                
+
                 <div className="mockup-image-section">
                   <div className="mockup-img-placeholder">
-                    {/* Visual Green Pin and comment bubble */}
                     <div className="mockup-pin-container">
                       <div className="mockup-pulse-pin"></div>
                       <div className="mockup-bubble">
-                        <span className="bubble-text">메인 이미지 교체가 필요합니다.</span>
-                        <span className="bubble-meta">2024-05-20 • 홍길동</span>
+                        <div className="bubble-header">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#07844E">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                          </svg>
+                          <span className="bubble-text">메인 이미지 교체가 필요합니다.</span>
+                        </div>
+                        <span className="bubble-meta">위치 기반 요청 핀</span>
                       </div>
                     </div>
                   </div>
@@ -200,4 +243,5 @@ export const Login: React.FC = () => {
     </div>
   );
 };
+
 export default Login;

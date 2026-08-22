@@ -10,6 +10,9 @@ import CustomerReview from './pages/CustomerReview';
 import Dashboard from './pages/Dashboard';
 import ProjectList from './pages/ProjectList';
 import Notifications from './pages/Notifications';
+import Invite from './pages/Invite';
+import KakaoCallback from './pages/KakaoCallback';
+import UserManagement from './pages/UserManagement';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 
@@ -43,11 +46,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
+  const isStandalonePage =
+    location.pathname === '/login' ||
+    location.pathname.startsWith('/invite') ||
+    location.pathname.startsWith('/auth/kakao/callback');
   const [currentProject, setCurrentProject] = useState('아워테이블');
   const [searchTerm, setSearchTerm] = useState('');
 
-  if (isLoginPage) {
+  if (isStandalonePage) {
     return <>{children}</>;
   }
 
@@ -70,6 +76,8 @@ export const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/invite" element={<Invite />} />
+        <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
         <Route path="/requests" element={<ProtectedRoute><RequestList /></ProtectedRoute>} />
         <Route path="/new-request" element={<ProtectedRoute><NewRequest /></ProtectedRoute>} />
         <Route path="/customer-review" element={<ProtectedRoute><CustomerReview /></ProtectedRoute>} />
@@ -78,8 +86,8 @@ export const AppContent: React.FC = () => {
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         
         {/* Fallback routes */}
-        <Route path="/clients" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>클라이언트 목록 (준비 중)</h2></div></ProtectedRoute>} />
-        <Route path="/users" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>사용자 관리 (준비 중)</h2></div></ProtectedRoute>} />
+        <Route path="/clients" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>클라이언트 목록</h2></div></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>설정 (준비 중)</h2></div></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

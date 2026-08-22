@@ -45,6 +45,29 @@ SiteOps는 웹사이트 문제 요청, 화면 피드백 핀(Pin) 지정, 진행 
 
 ---
 
+## 💬 카카오 OAuth & 초대 링크 설정 가이드 (Kakao OAuth & Invitations)
+
+실제 카카오 로그인 및 초대 수락 기능을 사용하려면 **카카오 개발자 센터(Kakao Developers)**에서 다음 설정이 완료되어야 합니다:
+
+1. **카카오 로그인 활성화**: `내 애플리케이션 > 카카오 로그인` 메뉴에서 활성화 상태를 `ON`으로 변경
+2. **Web 플랫폼 도메인 등록**: `내 애플리케이션 > 앱 설정 > 플랫폼 > Web`에 도메인 등록
+   - 프론트 운영: `https://site-ops-front.vercel.app` (로컬: `http://localhost:5173`)
+   - 백엔드 운영: `https://siteops-backend-production.up.railway.app` (로컬: `http://localhost:3000`)
+3. **Redirect URI 등록**:
+   - 운영: `https://siteops-backend-production.up.railway.app/api/v1/auth/kakao/callback`
+   - 로컬: `http://localhost:3000/api/v1/auth/kakao/callback`
+4. **동의항목 설정**:
+   - `카카오계정(이메일)`: 동의 설정 (필수 또는 선택)
+   - `프로필 정보(닉네임)`: 동의 설정 (필수)
+5. **Client Secret 활성화**: `카카오 로그인 > 보안`에서 Client Secret 생성 후 활성화
+6. **서버 환경변수 등록**:
+   - `KAKAO_REST_API_KEY`: 앱 키 > REST API 키
+   - `KAKAO_CLIENT_SECRET`: 보안 > Client Secret
+   - `KAKAO_REDIRECT_URI`: 카카오 콜백 URL
+   - `FRONTEND_URL`: 프론트엔드 도메인 URL
+
+---
+
 ## 💡 개발자 꿀팁 & 패턴 장단점 (Developer Pro-Tips & Trade-offs)
 
 ### 1. Axios Interceptor 토큰 자동 주입 (`src/lib/api.ts`)

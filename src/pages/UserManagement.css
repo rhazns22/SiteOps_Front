@@ -1,0 +1,132 @@
+.user-management-container {
+  padding: 32px;
+  font-family: Pretendard, "Noto Sans KR", sans-serif;
+}
+
+.user-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #667085;
+  margin: 0;
+}
+
+.invite-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background-color: #07844E;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.invite-action-btn:hover {
+  background-color: #066F43;
+}
+
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.user-card {
+  background: #ffffff;
+  border: 1px solid #EAECF0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+}
+
+.my-card {
+  border-color: #A6F4C5;
+  background: #F6FEF9;
+}
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #07844E;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0 0 2px 0;
+}
+
+.user-email {
+  font-size: 13px;
+  color: #667085;
+  margin: 0;
+}
+
+.user-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #344054;
+}
+
+.role-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.role-admin {
+  background: #FEE4E2;
+  color: #D92D20;
+}
+
+.role-worker {
+  background: #ECFDF3;
+  color: #027A48;
+}
+
+.role-client {
+  background: #EFF8FF;
+  color: #175CD3;
+}
