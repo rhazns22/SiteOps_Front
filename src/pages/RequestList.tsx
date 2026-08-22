@@ -7,6 +7,7 @@ import { apiErrorMessage, dashboardApi, projectApi, requestApi, uploadApi, userA
 import type { ApiRequest } from '../lib/api';
 import { mapApiProject, mapApiRequest, uiStatusToApi } from '../lib/mappers';
 import { useAuth } from '../context/useAuth';
+import { RequestLocationPreview } from '../components/requests/RequestLocationPreview';
 import './RequestList.css';
 
 export const RequestList: React.FC = () => {
@@ -121,6 +122,30 @@ export const RequestList: React.FC = () => {
 
   const selectedRequest = requests.find(r => r.id === selectedRequestId);
   const selectedRaw = selectedRequest?.raw as ApiRequest | undefined;
+
+  const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+
+  const beforePath = useMemo(() => {
+    if (!selectedRaw) return null;
+    if (selectedRaw.beforeImagePath) return selectedRaw.beforeImagePath;
+    const beforeAtt = selectedRaw.attachments?.find(
+      (att) => att.kind?.toLowerCase() === 'before'
+    );
+    return beforeAtt?.storagePath ?? null;
+  }, [selectedRaw]);
+
+  const beforeImageQuery = useQuery({
+    queryKey: ['request-before-image', selectedRequestId, beforePath],
+    queryFn: () => uploadApi.signedUrl(beforePath!),
+    enabled: Boolean(selectedRequestId && beforePath),
+    staleTime: 4 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 1
+  });
+
+  useEffect(() => {
+    setSelectedPinId(null);
+  }, [selectedRequestId]);
 
   useEffect(() => {
     setAssigneeId(selectedRaw?.assigneeId ?? '');
@@ -334,41 +359,21 @@ export const RequestList: React.FC = () => {
 
             <div className="drawer-section">
               <h3 className="section-title">화면 위치</h3>
-              <div className="drawer-mockup-wrapper">
-                <div className="drawer-browser-top">
-                  <span className="drawer-dot"></span>
-                  <span className="drawer-dot"></span>
-                  <span className="drawer-dot"></span>
-                  <div className="drawer-browser-url">ourtable.com</div>
-                </div>
-                
-                {/* Visual rendering of mockup matching screenshot */}
-                <div className="drawer-browser-preview">
-                  <div className="preview-overlay">
-                    <h4>맛있는 경험,</h4>
-                    <h4>특별한 순간을 예약하세요</h4>
-                    
-                    {/* Circle green pin */}
-                    {selectedRequest.pins && selectedRequest.pins.map(pin => (
-                      <div
-                        key={pin.id}
-                        className="preview-pin"
-                        style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-                      >
-                        {pin.id}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Pin labels */}
-                {selectedRequest.pins && selectedRequest.pins.map(pin => (
-                  <div key={pin.id} className="pin-label-row">
-                    <span className="pin-num">{pin.id}</span>
-                    <span className="pin-text">{pin.text}</span>
-                  </div>
-                ))}
-              </div>
+              <RequestLocationPreview
+                pageUrl={selectedRaw?.pageUrl}
+                imageUrl={beforeImageQuery.data?.signedUrl}
+                pins={selectedRaw?.pins?.map((pin) => ({
+                  id: pin.id,
+                  xPercent: pin.xPercent,
+                  yPercent: pin.yPercent,
+                  content: pin.content
+                })) ?? []}
+                isLoading={Boolean(beforePath && beforeImageQuery.isLoading)}
+                isError={beforeImageQuery.isError}
+                onRetry={() => beforeImageQuery.refetch()}
+                selectedPinId={selectedPinId}
+                onSelectPin={(pinId) => setSelectedPinId(pinId)}
+              />
             </div>
 
             <div className="drawer-section">

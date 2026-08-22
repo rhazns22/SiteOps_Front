@@ -138,14 +138,11 @@ export const CustomerReview: React.FC = () => {
         <div className="slider-canvas">
           {/* Before Image (Left side) */}
           <div className="canvas-pane before-pane">
-            {beforeUrlQuery.data?.signedUrl && (
+            {beforeUrlQuery.data?.signedUrl ? (
               <img className="review-actual-image" src={beforeUrlQuery.data.signedUrl} alt="수정 전 업로드 이미지" />
+            ) : (
+              <div className="pane-placeholder-text">등록된 수정 전 첨부 이미지가 없습니다.</div>
             )}
-            <div className="pane-content">
-              <h4>맛있는 경험,</h4>
-              <h4 className="highlight-banner before">특별한 오늘을 만나보세요</h4>
-              <button className="pane-cta">예약하기</button>
-            </div>
             <div className="label-indicator before-tag">수정 전 (기존)</div>
           </div>
 
@@ -154,14 +151,11 @@ export const CustomerReview: React.FC = () => {
             className="canvas-pane after-pane"
             style={{ clipPath: `polygon(${sliderPosition}% 0, 100% 0, 100% 100%, ${sliderPosition}% 100%)` }}
           >
-            {afterUrlQuery.data?.signedUrl && (
+            {afterUrlQuery.data?.signedUrl ? (
               <img className="review-actual-image" src={afterUrlQuery.data.signedUrl} alt="수정 후 업로드 이미지" />
+            ) : (
+              <div className="pane-placeholder-text">등록된 수정 후 첨부 이미지가 없습니다.</div>
             )}
-            <div className="pane-content">
-              <h4>맛있는 경험,</h4>
-              <h4 className="highlight-banner after">특별한 순간을 예약하세요</h4>
-              <button className="pane-cta">예약하기</button>
-            </div>
             <div className="label-indicator after-tag">수정 후 (변경)</div>
           </div>
 

@@ -104,6 +104,15 @@ export interface ApiRequest {
     content: string;
     createdAt: string;
   }[];
+  attachments?: {
+    id: string;
+    kind: 'before' | 'after' | 'attachment';
+    storagePath: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    createdAt: string;
+  }[];
 }
 
 export interface ApiNotification {
