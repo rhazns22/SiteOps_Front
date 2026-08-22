@@ -1,3 +1,5 @@
+import type { ApiProject, ApiRequest } from './lib/api';
+
 export interface User {
   id?: string;
   email?: string;
@@ -18,7 +20,7 @@ export interface Project {
     review: number;
     danger: number;
   };
-  raw?: unknown;
+  raw?: ApiProject;
 }
 
 export interface RequestActivity {
@@ -44,7 +46,7 @@ export interface MaintenanceRequest {
   assignee?: string;
   pins?: { id: number; apiId?: string; x: number; y: number; text: string }[];
   activities?: RequestActivity[];
-  raw?: unknown;
+  raw?: ApiRequest;
 }
 
 export interface NotificationItem {

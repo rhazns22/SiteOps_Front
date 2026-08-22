@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Calendar } from 'lucide-react';
 import './Header.css';
 
 interface HeaderProps {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
+  searchTerm?: string;
+  setSearchTerm?: (term: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
+  const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const value = searchTerm ?? localSearchTerm;
+  const updateValue = setSearchTerm ?? setLocalSearchTerm;
   const todayLabel = new Intl.DateTimeFormat('ko-KR', {
     year: 'numeric',
     month: '2-digit',
@@ -22,8 +25,8 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => 
         <input
           type="text"
           placeholder="검색..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={value}
+          onChange={(e) => updateValue(e.target.value)}
           className="search-input"
         />
       </div>

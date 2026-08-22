@@ -1,0 +1,203 @@
+.settings-page {
+  padding: 24px;
+  min-height: calc(100vh - 72px);
+  background: var(--background);
+}
+
+.settings-header {
+  margin-bottom: 16px;
+}
+
+.settings-header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.settings-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.settings-tabs {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px;
+}
+
+.settings-tabs button {
+  width: 100%;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-tabs button.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.settings-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 18px;
+  min-height: 420px;
+}
+
+.settings-panel h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.settings-form-grid.compact {
+  align-items: end;
+}
+
+.settings-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.settings-form-grid input,
+.settings-form-grid select {
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  background: var(--surface);
+  font-size: 13px;
+}
+
+.settings-form-grid input[readonly] {
+  color: var(--text-secondary);
+  background: #f9fafb;
+}
+
+.settings-readonly {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-readonly span,
+.security-status span,
+.settings-danger span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.settings-readonly strong,
+.security-status strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.settings-toggle-list {
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.settings-toggle {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.security-status,
+.settings-danger {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-danger {
+  margin-top: 18px;
+  border-color: #fecdca;
+  background: #fffafa;
+}
+
+.settings-danger div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-error,
+.settings-success,
+.settings-empty {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.settings-error {
+  color: #d92d20;
+}
+
+.settings-success {
+  color: #067647;
+}
+
+.settings-empty {
+  color: var(--text-secondary);
+}

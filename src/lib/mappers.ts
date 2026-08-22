@@ -92,10 +92,8 @@ export const mapApiRequest = (request: ApiRequest): MaintenanceRequest => ({
 });
 
 const thumbnailFor = (name: string) => {
-  if (name.includes('모노')) return 'monoshop';
-  if (name.includes('NEXA')) return 'nexa';
-  if (name.includes('라이프')) return 'lifestudio';
-  return 'ourtable';
+  const bucket = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 4;
+  return `project-tone-${bucket + 1}`;
 };
 
 export const mapApiProject = (project: ApiProject): Project => ({

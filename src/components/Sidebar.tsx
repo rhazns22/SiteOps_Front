@@ -16,12 +16,7 @@ import { dashboardApi } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import './Sidebar.css';
 
-interface SidebarProps {
-  currentProject: string;
-  setCurrentProject: (proj: string) => void;
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({ currentProject }) => {
+export const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -128,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentProject }) => {
         <div className="project-select-trigger">
           <div className="project-info">
             <span className="project-label">프로젝트</span>
-            <span className="project-name">{currentProject}</span>
+            <span className="project-name">전체 프로젝트</span>
           </div>
           <ChevronDown size={16} color="#69716d" />
         </div>

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Copy, Edit3, MoreHorizontal, Play, RotateCcw, Trash2, X } from 'lucide-react';
 import { StatusBadge, PriorityBadge, PrimaryButton, OutlineButton } from '../components/Common';
 import { apiErrorMessage, dashboardApi, projectApi, requestApi, uploadApi, userApi } from '../lib/api';
-import type { ApiRequest } from '../lib/api';
+import type { ApiPriority, ApiRequest } from '../lib/api';
 import { mapApiProject, mapApiRequest, uiStatusToApi } from '../lib/mappers';
 import { useAuth } from '../context/useAuth';
 import { RequestLocationPreview } from '../components/requests/RequestLocationPreview';
@@ -23,6 +23,16 @@ export const RequestList: React.FC = () => {
   const [assigneeId, setAssigneeId] = useState('');
   const [commentText, setCommentText] = useState('');
   const [afterFile, setAfterFile] = useState<File | null>(null);
+  const [pinEditContent, setPinEditContent] = useState('');
+  const [openMenuRequestId, setOpenMenuRequestId] = useState<string | null>(null);
+  const [editingRequest, setEditingRequest] = useState<ApiRequest | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    pageUrl: '',
+    priority: 'NORMAL' as ApiPriority,
+    dueDate: ''
+  });
 
   const requestQuery = useQuery({
     queryKey: ['requests', statusFilter, searchTerm],
@@ -32,6 +42,8 @@ export const RequestList: React.FC = () => {
         limit: 50,
         q: searchTerm || undefined,
         status: uiStatusToApi(statusFilter)
+          ?? undefined,
+        deleted: statusFilter === 'deleted' ? 'only' : 'active'
       })
   });
 
@@ -107,6 +119,76 @@ export const RequestList: React.FC = () => {
     }
   });
 
+  const updatePinMutation = useMutation({
+    mutationFn: () => {
+      if (!selectedRaw || !selectedPinId) throw new Error('수정할 핀이 없습니다.');
+      return requestApi.updatePin(selectedRaw.id, selectedPinId, { content: pinEditContent });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+    }
+  });
+
+  const deletePinMutation = useMutation({
+    mutationFn: () => {
+      if (!selectedRaw || !selectedPinId) throw new Error('삭제할 핀이 없습니다.');
+      return requestApi.deletePin(selectedRaw.id, selectedPinId);
+    },
+    onSuccess: () => {
+      setSelectedPinId(null);
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: () => {
+      if (!editingRequest) throw new Error('수정할 요청이 없습니다.');
+      return requestApi.update(editingRequest.id, {
+        title: editForm.title,
+        description: editForm.description,
+        pageUrl: editForm.pageUrl,
+        priority: editForm.priority,
+        dueDate: editForm.dueDate || null,
+        updatedAt: editingRequest.updatedAt
+      });
+    },
+    onSuccess: (request) => {
+      setEditingRequest(null);
+      setSelectedRequestId(request.id);
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ requestId, reason }: { requestId: string; reason?: string }) => requestApi.delete(requestId, reason),
+    onSuccess: () => {
+      setSelectedRequestId(null);
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+    }
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: requestApi.restore,
+    onSuccess: (request) => {
+      setSelectedRequestId(request.id);
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+    }
+  });
+
+  const rowStatusMutation = useMutation({
+    mutationFn: ({ requestId, status }: { requestId: string; status: 'IN_PROGRESS' | 'REVIEW_REQUESTED' }) =>
+      requestApi.updateStatus(requestId, status, status === 'IN_PROGRESS' ? '작업을 시작합니다.' : '작업 완료 후 검수 요청을 보냈습니다.'),
+    onSuccess: (request) => {
+      setSelectedRequestId(request.id);
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }
+  });
+
   const requests = useMemo(() => requestQuery.data?.items.map(mapApiRequest) ?? [], [requestQuery.data]);
   const projects = useMemo(() => projectQuery.data?.map(mapApiProject) ?? [], [projectQuery.data]);
 
@@ -147,6 +229,12 @@ export const RequestList: React.FC = () => {
     setSelectedPinId(null);
   }, [selectedRequestId]);
 
+  const selectedPin = selectedRaw?.pins?.find((pin) => pin.id === selectedPinId) ?? null;
+
+  useEffect(() => {
+    setPinEditContent(selectedPin?.content ?? '');
+  }, [selectedPin?.id, selectedPin?.content]);
+
   useEffect(() => {
     setAssigneeId(selectedRaw?.assigneeId ?? '');
     setCommentText('');
@@ -162,6 +250,25 @@ export const RequestList: React.FC = () => {
       setSelectedRequestId(filteredRequests[0].id);
     }
   }, [filteredRequests, selectedRequestId]);
+
+  useEffect(() => {
+    if (!openMenuRequestId) return;
+
+    const closeMenu = () => setOpenMenuRequestId(null);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('click', closeMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openMenuRequestId]);
 
   const handleStatusTabChange = (status: string) => {
     setSearchParams({ status, project: projectFilter });
@@ -180,9 +287,45 @@ export const RequestList: React.FC = () => {
     reviewMutation.mutate({ requestId: selectedRaw.id, decision });
   };
 
-  const canAssign = Boolean(selectedRaw && currentUser?.role === 'ADMIN' && selectedRaw.status !== 'COMPLETED');
-  const canWork = Boolean(selectedRaw && currentUser?.role === 'WORKER' && selectedRaw.assigneeId === currentUser.id && selectedRaw.status !== 'COMPLETED');
-  const canReview = Boolean(selectedRaw && currentUser?.role === 'CLIENT' && selectedRaw.status === 'REVIEW_REQUESTED');
+  const openEdit = (request: ApiRequest) => {
+    setEditingRequest(request);
+    setEditForm({
+      title: request.title,
+      description: request.description,
+      pageUrl: request.pageUrl,
+      priority: request.priority,
+      dueDate: request.dueDate ? request.dueDate.slice(0, 10) : ''
+    });
+    setOpenMenuRequestId(null);
+  };
+
+  const handleDelete = (request: ApiRequest) => {
+    const reason = window.prompt('삭제 사유를 입력해 주세요. 생략할 수 있습니다.') ?? undefined;
+    deleteMutation.mutate({ requestId: request.id, reason });
+    setOpenMenuRequestId(null);
+  };
+
+  const canEditRow = (request: ApiRequest) => {
+    if (request.deletedAt || request.status === 'COMPLETED') return false;
+    if (currentUser?.role === 'ADMIN') return true;
+    return currentUser?.role === 'CLIENT' && request.requesterId === currentUser.id && request.status === 'RECEIVED';
+  };
+
+  const canDeleteRow = (request: ApiRequest) => {
+    if (request.deletedAt || request.status === 'COMPLETED') return false;
+    if (currentUser?.role === 'ADMIN') return true;
+    return currentUser?.role === 'CLIENT' && request.requesterId === currentUser.id && request.status === 'RECEIVED';
+  };
+
+  const canWorkRow = (request: ApiRequest) =>
+    currentUser?.role === 'WORKER' &&
+    request.assigneeId === currentUser.id &&
+    !request.deletedAt &&
+    request.status !== 'COMPLETED';
+
+  const canAssign = Boolean(selectedRaw && currentUser?.role === 'ADMIN' && !selectedRaw.deletedAt && selectedRaw.status !== 'COMPLETED');
+  const canWork = Boolean(selectedRaw && currentUser?.role === 'WORKER' && selectedRaw.assigneeId === currentUser.id && !selectedRaw.deletedAt && selectedRaw.status !== 'COMPLETED');
+  const canReview = Boolean(selectedRaw && currentUser?.role === 'CLIENT' && !selectedRaw.deletedAt && selectedRaw.status === 'REVIEW_REQUESTED');
 
   return (
     <div className="request-list-container">
@@ -220,11 +363,12 @@ export const RequestList: React.FC = () => {
           </div>
 
           <div className="tabs-group" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-            {['all', 'received', 'progress', 'review', 'done'].map((tab) => {
+            {['all', 'received', 'progress', 'review', 'done', ...(currentUser?.role === 'ADMIN' ? ['deleted'] : [])].map((tab) => {
               const label = tab === 'all' ? '전체' :
                             tab === 'received' ? '접수' :
                             tab === 'progress' ? '진행 중' :
-                            tab === 'review' ? '검수 요청' : '완료';
+                            tab === 'review' ? '검수 요청' :
+                            tab === 'deleted' ? '삭제됨' : '완료';
               return (
                 <button
                   key={tab}
@@ -305,7 +449,69 @@ export const RequestList: React.FC = () => {
                   <td><StatusBadge status={req.status} /></td>
                   <td><PriorityBadge priority={req.priority} /></td>
                   <td style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{req.createdAt}</td>
-                  <td onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}>•••</td>
+                  <td onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', position: 'relative' }}>
+                    <button
+                      type="button"
+                      className="request-options-button"
+                      aria-haspopup="menu"
+                      aria-expanded={openMenuRequestId === req.id}
+                      onClick={() => setOpenMenuRequestId(openMenuRequestId === req.id ? null : req.id)}
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                    {openMenuRequestId === req.id && (
+                      <div className="request-options-menu" role="menu">
+                        <button type="button" onClick={() => { setSelectedRequestId(req.id); setOpenMenuRequestId(null); }}>
+                          상세 보기
+                        </button>
+                        {canEditRow(req.raw as ApiRequest) && (
+                          <button type="button" onClick={() => openEdit(req.raw as ApiRequest)}>
+                            <Edit3 size={14} />
+                            수정
+                          </button>
+                        )}
+                        {!(req.raw as ApiRequest).deletedAt && (
+                          <button type="button" onClick={() => navigate(`/new-request?cloneId=${req.id}`)}>
+                            <Copy size={14} />
+                            복제하여 새 요청
+                          </button>
+                        )}
+                        {currentUser?.role === 'ADMIN' && !(req.raw as ApiRequest).deletedAt && (req.raw as ApiRequest).status !== 'COMPLETED' && (
+                          <button type="button" onClick={() => { setSelectedRequestId(req.id); setOpenMenuRequestId(null); }}>
+                            담당자 배정
+                          </button>
+                        )}
+                        {canWorkRow(req.raw as ApiRequest) && ((req.raw as ApiRequest).status === 'RECEIVED' || (req.raw as ApiRequest).status === 'REJECTED') && (
+                          <button type="button" onClick={() => { rowStatusMutation.mutate({ requestId: req.id, status: 'IN_PROGRESS' }); setOpenMenuRequestId(null); }}>
+                            <Play size={14} />
+                            작업 시작
+                          </button>
+                        )}
+                        {canWorkRow(req.raw as ApiRequest) && (req.raw as ApiRequest).status === 'IN_PROGRESS' && (
+                          <button type="button" onClick={() => { rowStatusMutation.mutate({ requestId: req.id, status: 'REVIEW_REQUESTED' }); setOpenMenuRequestId(null); }}>
+                            검수 요청
+                          </button>
+                        )}
+                        {currentUser?.role === 'CLIENT' && (req.raw as ApiRequest).status === 'REVIEW_REQUESTED' && !(req.raw as ApiRequest).deletedAt && (
+                          <button type="button" onClick={() => { setSelectedRequestId(req.id); setOpenMenuRequestId(null); }}>
+                            검수하기
+                          </button>
+                        )}
+                        {canDeleteRow(req.raw as ApiRequest) && (
+                          <button type="button" className="danger" onClick={() => handleDelete(req.raw as ApiRequest)}>
+                            <Trash2 size={14} />
+                            삭제
+                          </button>
+                        )}
+                        {currentUser?.role === 'ADMIN' && (req.raw as ApiRequest).deletedAt && (
+                          <button type="button" onClick={() => { restoreMutation.mutate(req.id); setOpenMenuRequestId(null); }}>
+                            <RotateCcw size={14} />
+                            복원
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -374,6 +580,39 @@ export const RequestList: React.FC = () => {
                 selectedPinId={selectedPinId}
                 onSelectPin={(pinId) => setSelectedPinId(pinId)}
               />
+              {selectedPin && canEditRow(selectedRaw!) && (
+                <div className="pin-edit-panel">
+                  <label>
+                    <span>선택 핀 내용</span>
+                    <input
+                      value={pinEditContent}
+                      maxLength={200}
+                      onChange={(event) => setPinEditContent(event.target.value)}
+                    />
+                  </label>
+                  <div>
+                    <OutlineButton
+                      type="button"
+                      onClick={() => deletePinMutation.mutate()}
+                      disabled={deletePinMutation.isPending}
+                    >
+                      핀 삭제
+                    </OutlineButton>
+                    <PrimaryButton
+                      type="button"
+                      onClick={() => updatePinMutation.mutate()}
+                      disabled={updatePinMutation.isPending || !pinEditContent.trim()}
+                    >
+                      핀 저장
+                    </PrimaryButton>
+                  </div>
+                  {(updatePinMutation.isError || deletePinMutation.isError) && (
+                    <span style={{ color: '#D92D20', fontSize: '12px' }}>
+                      {apiErrorMessage(updatePinMutation.error ?? deletePinMutation.error)}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="drawer-section">
@@ -484,6 +723,57 @@ export const RequestList: React.FC = () => {
             </OutlineButton>
           </div>
           )}
+        </div>
+      )}
+
+      {editingRequest && (
+        <div className="request-edit-backdrop" role="dialog" aria-modal="true">
+          <form
+            className="request-edit-modal"
+            onSubmit={(event) => {
+              event.preventDefault();
+              updateMutation.mutate();
+            }}
+          >
+            <div className="drawer-header">
+              <h2 className="drawer-title">요청 수정</h2>
+              <button type="button" className="close-btn" onClick={() => setEditingRequest(null)}><X size={18} /></button>
+            </div>
+            <label>
+              <span>제목</span>
+              <input value={editForm.title} onChange={(event) => setEditForm((prev) => ({ ...prev, title: event.target.value }))} />
+            </label>
+            <label>
+              <span>페이지 URL</span>
+              <input value={editForm.pageUrl} onChange={(event) => setEditForm((prev) => ({ ...prev, pageUrl: event.target.value }))} />
+            </label>
+            <label>
+              <span>요청 내용</span>
+              <textarea rows={5} value={editForm.description} onChange={(event) => setEditForm((prev) => ({ ...prev, description: event.target.value }))} />
+            </label>
+            <div className="request-edit-grid">
+              <label>
+                <span>우선순위</span>
+                <select value={editForm.priority} onChange={(event) => setEditForm((prev) => ({ ...prev, priority: event.target.value as ApiPriority }))}>
+                  <option value="LOW">낮음</option>
+                  <option value="NORMAL">보통</option>
+                  <option value="HIGH">높음</option>
+                  <option value="URGENT">긴급</option>
+                </select>
+              </label>
+              <label>
+                <span>희망 완료일</span>
+                <input type="date" value={editForm.dueDate} onChange={(event) => setEditForm((prev) => ({ ...prev, dueDate: event.target.value }))} />
+              </label>
+            </div>
+            {updateMutation.isError && <div style={{ color: '#D92D20', fontSize: '13px' }}>{apiErrorMessage(updateMutation.error)}</div>}
+            <div className="drawer-actions">
+              <OutlineButton type="button" onClick={() => setEditingRequest(null)}>취소</OutlineButton>
+              <PrimaryButton disabled={updateMutation.isPending || !editForm.title.trim() || !editForm.description.trim() || !editForm.pageUrl.trim()}>
+                저장
+              </PrimaryButton>
+            </div>
+          </form>
         </div>
       )}
     </div>

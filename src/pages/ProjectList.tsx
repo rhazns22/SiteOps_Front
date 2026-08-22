@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Sliders, Plus } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { apiErrorMessage, dashboardApi, projectApi, requestApi } from '../lib/api';
 import { mapApiProject, mapApiRequest } from '../lib/mappers';
-import { PrimaryButton, OutlineButton } from '../components/Common';
 import './ProjectList.css';
 
 export const ProjectList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
 
   const projectQuery = useQuery({
     queryKey: ['projects'],
@@ -39,10 +37,6 @@ export const ProjectList: React.FC = () => {
       <div className="project-main-area">
         <div className="project-header-row">
           <h1 className="project-title">프로젝트</h1>
-          <PrimaryButton>
-            <Plus size={16} />
-            새 프로젝트
-          </PrimaryButton>
         </div>
 
         {/* Filter controls row */}
@@ -57,25 +51,6 @@ export const ProjectList: React.FC = () => {
             />
           </div>
 
-          <div className="filters-selectors">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="all">전체 상태</option>
-              <option value="active">진행 중</option>
-            </select>
-            
-            <select>
-              <option>전체 클라이언트</option>
-            </select>
-
-            <select>
-              <option>전체 담당자</option>
-            </select>
-
-            <OutlineButton className="filter-options-btn">
-              <Sliders size={16} />
-              필터
-            </OutlineButton>
-          </div>
         </div>
 
         {/* 2x2 Grid of Project cards */}
@@ -99,7 +74,6 @@ export const ProjectList: React.FC = () => {
                   <h3 className="proj-name-title">{proj.name}</h3>
                   <span className="proj-badge active">진행 중</span>
                 </div>
-                <button className="more-btn">•••</button>
               </div>
 
               <div className="proj-domain-meta">
@@ -110,13 +84,10 @@ export const ProjectList: React.FC = () => {
                 </div>
               </div>
 
-              {/* Render CSS Mockup screenshot thumbnail instead of broken placeholders */}
               <div className={`proj-thumbnail-mockup ${proj.thumbnail}`}>
                 <div className="mockup-banner-content">
-                  {proj.id === 'ourtable' && <span>맛있는 경험, 특별한 순간</span>}
-                  {proj.id === 'monoshop' && <span>SIMPLE, BUT BETTER</span>}
-                  {proj.id === 'nexa' && <span>Connect the Future</span>}
-                  {proj.id === 'lifestudio' && <span>Life, Studio</span>}
+                  <span>{proj.name}</span>
+                  <small>{proj.url}</small>
                 </div>
               </div>
 

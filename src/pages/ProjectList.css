@@ -139,7 +139,6 @@
   font-weight: 600;
 }
 
-/* CSS Mockups of pages */
 .proj-thumbnail-mockup {
   height: 140px;
   border-radius: 8px;
@@ -147,21 +146,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--surface);
+  color: #fff;
   font-weight: 700;
   font-size: 13px;
   border: 1px solid var(--border);
 }
 
-.proj-thumbnail-mockup.ourtable { background-color: #35251d; }
-.proj-thumbnail-mockup.monoshop { background-color: #dcdfdc; color: var(--text-primary); }
-.proj-thumbnail-mockup.nexa { background-color: #121526; }
-.proj-thumbnail-mockup.lifestudio { background-color: #eae9e5; color: var(--text-primary); }
+.proj-thumbnail-mockup.project-tone-1 { background-color: #1d5142; }
+.proj-thumbnail-mockup.project-tone-2 { background-color: #344054; }
+.proj-thumbnail-mockup.project-tone-3 { background-color: #315078; }
+.proj-thumbnail-mockup.project-tone-4 { background-color: #4a5568; }
 
 .mockup-banner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   padding: 8px 16px;
-  border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.mockup-banner-content small {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
 }
 
 .proj-card-footer {

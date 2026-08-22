@@ -12,6 +12,8 @@ export interface ApiUser {
   name: string;
   role: ApiRole;
   clientId?: string | null;
+  phone?: string | null;
+  avatarPath?: string | null;
 }
 
 export interface ApiInvitation {
@@ -78,6 +80,9 @@ export interface ApiRequest {
   afterImagePath?: string | null;
   reviewRequestedAt?: string | null;
   completedAt?: string | null;
+  deletedAt?: string | null;
+  deletedById?: string | null;
+  deleteReason?: string | null;
   createdAt: string;
   updatedAt: string;
   pins: {
@@ -113,6 +118,75 @@ export interface ApiRequest {
     size: number;
     createdAt: string;
   }[];
+}
+
+export interface ApiClient {
+  id: string;
+  name: string;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  memo?: string | null;
+  isActive: boolean;
+  archivedAt?: string | null;
+  managerId?: string | null;
+  managerName?: string | null;
+  managerEmail?: string | null;
+  projectCount: number;
+  userCount: number;
+  progressCount: number;
+  reviewCount: number;
+  recentRequestAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  projects?: ApiProject[];
+  users?: ApiUser[];
+  recentRequests?: ApiRequest[];
+  activities?: {
+    id: string;
+    user: string;
+    role: string;
+    type: string;
+    createdAt: string;
+  }[];
+}
+
+export interface ApiUserSettings {
+  id: string;
+  email: string | null;
+  name: string;
+  phone?: string | null;
+  avatarPath?: string | null;
+  role: ApiRole;
+  clientId?: string | null;
+  clientName?: string | null;
+  authProvider: 'LOCAL' | 'KAKAO';
+  kakaoLinked: boolean;
+  hasPassword: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiNotificationPreference {
+  assignedNotification: boolean;
+  commentNotification: boolean;
+  reviewNotification: boolean;
+  approvedNotification: boolean;
+  rejectedNotification: boolean;
+  deadlineNotification: boolean;
+  emailNotification: boolean;
+  appNotification: boolean;
+  updatedAt: string;
+}
+
+export interface ApiWorkspaceSetting {
+  id: string;
+  serviceName: string;
+  defaultDueDays: number;
+  defaultPriority: ApiPriority;
+  maxFileSizeMb: number;
+  inviteExpiresInDays: number;
+  updatedAt: string;
 }
 
 export interface ApiNotification {
@@ -296,6 +370,10 @@ export const projectApi = {
 };
 
 export const requestApi = {
+  async detail(requestId: string) {
+    const { data } = await api.get<ApiRequest>(`/requests/${requestId}`);
+    return data;
+  },
   async list(params: {
     page?: number;
     limit?: number;
@@ -304,6 +382,7 @@ export const requestApi = {
     priority?: ApiPriority;
     projectId?: string;
     assigneeId?: string;
+    deleted?: 'active' | 'only' | 'include';
   }) {
     const { data } = await api.get<Paginated<ApiRequest>>('/requests', { params });
     return data;
@@ -318,6 +397,27 @@ export const requestApi = {
     pins?: { xPercent: number; yPercent: number; content: string; sortOrder?: number }[];
   }) {
     const { data } = await api.post<ApiRequest>('/requests', body);
+    return data;
+  },
+  async update(
+    requestId: string,
+    body: {
+      title?: string;
+      description?: string;
+      pageUrl?: string;
+      priority?: ApiPriority;
+      dueDate?: string | null;
+      updatedAt?: string;
+    }
+  ) {
+    const { data } = await api.patch<ApiRequest>(`/requests/${requestId}`, body);
+    return data;
+  },
+  async delete(requestId: string, reason?: string) {
+    await api.delete(`/requests/${requestId}`, { data: { reason } });
+  },
+  async restore(requestId: string) {
+    const { data } = await api.post<ApiRequest>(`/requests/${requestId}/restore`);
     return data;
   },
   async review(requestId: string, decision: ApiReviewDecision, comment?: string) {
@@ -369,6 +469,104 @@ export const requestApi = {
   }
 };
 
+export const clientApi = {
+  async list(params: {
+    page?: number;
+    limit?: number;
+    q?: string;
+    status?: 'all' | 'active' | 'inactive';
+    managerId?: string;
+    sortBy?: 'name' | 'projectCount' | 'progressCount' | 'reviewCount' | 'recentRequestAt';
+    sortDir?: 'asc' | 'desc';
+  }) {
+    const { data } = await api.get<Paginated<ApiClient>>('/clients', { params });
+    return data;
+  },
+  async detail(clientId: string) {
+    const { data } = await api.get<ApiClient>(`/clients/${clientId}`);
+    return data;
+  },
+  async create(body: {
+    name: string;
+    contactName?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    memo?: string | null;
+    managerId?: string | null;
+  }) {
+    const { data } = await api.post<ApiClient>('/clients', body);
+    return data;
+  },
+  async update(
+    clientId: string,
+    body: {
+      name?: string;
+      contactName?: string | null;
+      contactEmail?: string | null;
+      contactPhone?: string | null;
+      memo?: string | null;
+      managerId?: string | null;
+    }
+  ) {
+    const { data } = await api.patch<ApiClient>(`/clients/${clientId}`, body);
+    return data;
+  },
+  async updateStatus(clientId: string, isActive: boolean) {
+    const { data } = await api.patch<ApiClient>(`/clients/${clientId}/status`, { isActive });
+    return data;
+  },
+  async projects(clientId: string) {
+    const { data } = await api.get<{ items: ApiProject[] }>(`/clients/${clientId}/projects`);
+    return data.items;
+  },
+  async users(clientId: string) {
+    const { data } = await api.get<{ items: ApiUser[] }>(`/clients/${clientId}/users`);
+    return data.items;
+  },
+  async requests(clientId: string) {
+    const { data } = await api.get<{ items: ApiRequest[] }>(`/clients/${clientId}/requests`);
+    return data.items;
+  }
+};
+
+export const settingsApi = {
+  async me() {
+    const { data } = await api.get<ApiUserSettings>('/settings/me');
+    return data;
+  },
+  async updateProfile(body: { name?: string; phone?: string | null; avatarPath?: string | null }) {
+    const { data } = await api.patch<ApiUser>('/settings/profile', body);
+    return data;
+  },
+  async notifications() {
+    const { data } = await api.get<ApiNotificationPreference>('/settings/notifications');
+    return data;
+  },
+  async updateNotifications(body: Partial<Omit<ApiNotificationPreference, 'updatedAt'>>) {
+    const { data } = await api.patch<ApiNotificationPreference>('/settings/notifications', body);
+    return data;
+  },
+  async changePassword(currentPassword: string, newPassword: string) {
+    await api.post('/settings/change-password', { currentPassword, newPassword });
+  },
+  async revokeSessions() {
+    await api.post('/settings/revoke-sessions');
+  },
+  async workspace() {
+    const { data } = await api.get<ApiWorkspaceSetting>('/settings/workspace');
+    return data;
+  },
+  async updateWorkspace(body: {
+    serviceName?: string;
+    defaultDueDays?: number;
+    defaultPriority?: ApiPriority;
+    inviteExpiresInDays?: number;
+  }) {
+    const { data } = await api.patch<ApiWorkspaceSetting>('/settings/workspace', body);
+    return data;
+  }
+};
+
 export const uploadApi = {
   async uploadRequestAttachment(requestId: string, file: File, kind: string) {
     const form = new FormData();
@@ -417,6 +615,12 @@ export const notificationApi = {
 };
 
 export const userApi = {
+  async admins() {
+    const { data } = await api.get<{ items: ApiUser[] }>('/users', {
+      params: { role: 'ADMIN' }
+    });
+    return data.items;
+  },
   async workers() {
     const { data } = await api.get<{ items: ApiUser[] }>('/users', {
       params: { role: 'WORKER' }

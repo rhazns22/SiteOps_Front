@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ToggleLeft, ToggleRight, CheckCircle2 } from 'lucide-react';
-import { apiErrorMessage, notificationApi } from '../lib/api';
+import { apiErrorMessage, notificationApi, settingsApi } from '../lib/api';
 import { mapApiNotification } from '../lib/mappers';
 import { OutlineButton } from '../components/Common';
 import './Notifications.css';
@@ -27,10 +27,17 @@ export const Notifications: React.FC = () => {
   const [showReview, setShowReview] = useState(true);
   const [showDone, setShowDone] = useState(true);
 
-  // Settings Toggles
-  const [emailAlert, setEmailAlert] = useState(true);
-  const [browserAlert, setBrowserAlert] = useState(false);
-  const [weeklyReport, setWeeklyReport] = useState(true);
+  const preferencesQuery = useQuery({
+    queryKey: ['settings', 'notifications'],
+    queryFn: settingsApi.notifications
+  });
+
+  const preferenceMutation = useMutation({
+    mutationFn: (body: Record<string, boolean>) => settingsApi.updateNotifications(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', 'notifications'] });
+    }
+  });
 
   const handleReadAll = () => {
     readAllMutation.mutate();
@@ -147,28 +154,36 @@ export const Notifications: React.FC = () => {
         <div className="settings-section">
           <h3 className="settings-title">알림 설정</h3>
           
-          <div className="toggle-item" onClick={() => setEmailAlert(!emailAlert)}>
+          {preferencesQuery.isError && (
+            <div style={{ padding: '8px 0', color: '#D92D20', fontSize: '12px' }}>{apiErrorMessage(preferencesQuery.error)}</div>
+          )}
+
+          <div
+            className="toggle-item"
+            onClick={() => {
+              const current = preferencesQuery.data?.emailNotification ?? false;
+              preferenceMutation.mutate({ emailNotification: !current });
+            }}
+          >
             <div className="toggle-text">
               <span className="toggle-label">이메일 알림 수신</span>
               <span className="toggle-sub">신규 요청 및 댓글 등록 시 이메일 발송</span>
             </div>
-            {emailAlert ? <ToggleRight size={36} color="#07844e" /> : <ToggleLeft size={36} color="#9aa39e" />}
+            {preferencesQuery.data?.emailNotification ? <ToggleRight size={36} color="#07844e" /> : <ToggleLeft size={36} color="#9aa39e" />}
           </div>
 
-          <div className="toggle-item" onClick={() => setBrowserAlert(!browserAlert)}>
+          <div
+            className="toggle-item"
+            onClick={() => {
+              const current = preferencesQuery.data?.appNotification ?? true;
+              preferenceMutation.mutate({ appNotification: !current });
+            }}
+          >
             <div className="toggle-text">
-              <span className="toggle-label">브라우저 실시간 알림</span>
-              <span className="toggle-sub">작업 진행 상태 변동 시 브라우저 푸시</span>
+              <span className="toggle-label">앱 내 알림</span>
+              <span className="toggle-sub">작업 진행 상태 변동 시 앱 알림 저장</span>
             </div>
-            {browserAlert ? <ToggleRight size={36} color="#07844e" /> : <ToggleLeft size={36} color="#9aa39e" />}
-          </div>
-
-          <div className="toggle-item" onClick={() => setWeeklyReport(!weeklyReport)}>
-            <div className="toggle-text">
-              <span className="toggle-label">주간 운영 리포트</span>
-              <span className="toggle-sub">매주 월요일 프로젝트별 요약 리포트 수신</span>
-            </div>
-            {weeklyReport ? <ToggleRight size={36} color="#07844e" /> : <ToggleLeft size={36} color="#9aa39e" />}
+            {preferencesQuery.data?.appNotification ? <ToggleRight size={36} color="#07844e" /> : <ToggleLeft size={36} color="#9aa39e" />}
           </div>
         </div>
 

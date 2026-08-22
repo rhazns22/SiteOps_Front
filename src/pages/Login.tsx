@@ -72,7 +72,7 @@ export const Login: React.FC = () => {
                 fontSize="24"
                 fontWeight="800"
                 fontFamily="Pretendard, sans-serif"
-                letterSpacing="-0.5"
+                letterSpacing="0"
               >
                 SiteOps
               </text>
@@ -145,32 +145,6 @@ export const Login: React.FC = () => {
               {loginMutation.isPending ? '로그인 중...' : '이메일로 로그인'}
             </button>
           </form>
-
-          {import.meta.env.DEV && (
-            <div className="demo-account-selector">
-              <span className="demo-label">테스트 계정 선택 (이메일 자동 입력):</span>
-              <div className="demo-btn-group">
-                <button
-                  type="button"
-                  onClick={() => { setEmail('admin@siteops.demo'); setPassword('demo1234'); }}
-                >
-                  어드민 (ADMIN)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setEmail('worker@siteops.demo'); setPassword('demo1234'); }}
-                >
-                  작업자 (WORKER)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setEmail('client@siteops.demo'); setPassword('demo1234'); }}
-                >
-                  고객사 (CLIENT)
-                </button>
-              </div>
-            </div>
-          )}
 
           <div className="invite-footer">
             <span>처음이신가요? </span>

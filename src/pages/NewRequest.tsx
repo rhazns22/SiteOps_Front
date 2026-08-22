@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate as useNav } from 'react-router-dom';
+import { useNavigate as useNav, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, RefreshCw, Trash2 } from 'lucide-react';
 import { PrimaryButton, OutlineButton } from '../components/Common';
@@ -17,6 +17,7 @@ export interface EditablePin {
 
 export const NewRequest: React.FC = () => {
   const navigate = useNav();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -57,6 +58,13 @@ export const NewRequest: React.FC = () => {
     queryFn: projectApi.list
   });
 
+  const cloneId = searchParams.get('cloneId');
+  const cloneQuery = useQuery({
+    queryKey: ['requests', 'clone', cloneId],
+    queryFn: () => requestApi.detail(cloneId!),
+    enabled: Boolean(cloneId)
+  });
+
   const projects = useMemo(() => projectQuery.data?.map(mapApiProject) ?? [], [projectQuery.data]);
   const selectedProject = projects.find((project) => project.id === projectId);
 
@@ -66,6 +74,24 @@ export const NewRequest: React.FC = () => {
       setPageUrl(`https://${projects[0].url}`);
     }
   }, [projectId, projects]);
+
+  useEffect(() => {
+    if (!cloneQuery.data) return;
+
+    setProjectId(cloneQuery.data.projectId);
+    setPageUrl(cloneQuery.data.pageUrl);
+    setTitle(cloneQuery.data.title);
+    setContent(cloneQuery.data.description);
+    setPriority(
+      cloneQuery.data.priority === 'LOW' ? 'low' :
+      cloneQuery.data.priority === 'HIGH' || cloneQuery.data.priority === 'URGENT' ? 'high' :
+      'medium'
+    );
+    setDueDate('');
+    setSelectedFile(null);
+    setPins([]);
+    setSelectedPinId(null);
+  }, [cloneQuery.data]);
 
   const isPdfFile = Boolean(selectedFile && selectedFile.name.toLowerCase().endsWith('.pdf'));
 
@@ -154,7 +180,7 @@ export const NewRequest: React.FC = () => {
   const handleReplaceImageClick = () => {
     if (pins.length > 0) {
       const confirmReplace = window.confirm(
-        `이미지를 교체하시겠습니까? 기존에 지정한 ${pins.length}개의 수정 위치(핀)가 모두 삭제됩니다.`
+        `이미지를 교체하시겠습니까? 기존에 지정한 ${pins.length}개의 수정 위치가 모두 삭제됩니다.`
       );
       if (!confirmReplace) return;
     }
@@ -315,6 +341,16 @@ export const NewRequest: React.FC = () => {
       {step === 1 && (
         <div className="step-form-card">
           <div className="form-grid">
+            {cloneQuery.isLoading && (
+              <div style={{ gridColumn: '1 / -1', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                복제할 요청 정보를 불러오는 중입니다...
+              </div>
+            )}
+            {cloneQuery.isError && (
+              <div style={{ gridColumn: '1 / -1', color: '#D92D20', fontSize: '13px' }}>
+                {apiErrorMessage(cloneQuery.error)}
+              </div>
+            )}
             <div className="form-group">
               <label>프로젝트 선택 <span style={{ color: '#D92D20' }}>*</span></label>
               <select value={projectId} onChange={(e) => handleProjectChange(e.target.value)}>
@@ -336,7 +372,7 @@ export const NewRequest: React.FC = () => {
               <label>페이지 URL</label>
               <input
                 type="text"
-                placeholder="https://example.com/page"
+                placeholder="https://도메인/페이지"
                 value={pageUrl}
                 onChange={(e) => setPageUrl(e.target.value)}
               />
@@ -441,7 +477,7 @@ export const NewRequest: React.FC = () => {
                 <span className="browser-dot"></span>
                 <span className="browser-dot"></span>
                 <span className="browser-dot"></span>
-                <div className="browser-url-bar">{pageUrl.replace(/^https?:\/\//, '') || 'example.com'}</div>
+                <div className="browser-url-bar">{pageUrl.replace(/^https?:\/\//, '') || '페이지 URL 미입력'}</div>
               </div>
 
               {/* Exact image bounding stage */}
@@ -475,7 +511,7 @@ export const NewRequest: React.FC = () => {
                       onKeyDown={(e) => handleKeyDownPin(e, pin.id)}
                     >
                       <span className="pin-circle">{pinNumber}</span>
-                      
+
                       {isSelected && (
                         <div className="pin-popover" onClick={(e) => e.stopPropagation()}>
                           <div className="popover-header">

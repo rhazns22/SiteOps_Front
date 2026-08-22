@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Sidebar from './components/Sidebar';
@@ -13,6 +13,8 @@ import Notifications from './pages/Notifications';
 import Invite from './pages/Invite';
 import KakaoCallback from './pages/KakaoCallback';
 import UserManagement from './pages/UserManagement';
+import ClientManagement from './pages/ClientManagement';
+import SettingsPage from './pages/SettingsPage';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 
@@ -52,8 +54,6 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     location.pathname === '/login' ||
     location.pathname.startsWith('/invite') ||
     location.pathname.startsWith('/auth/kakao/callback');
-  const [currentProject, setCurrentProject] = useState('아워테이블');
-  const [searchTerm, setSearchTerm] = useState('');
 
   if (isStandalonePage) {
     return <>{children}</>;
@@ -61,9 +61,9 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--background)' }}>
-      <Sidebar currentProject={currentProject} setCurrentProject={setCurrentProject} />
+      <Sidebar />
       <div style={{ flex: 1, paddingLeft: '216px', paddingTop: '72px' }}>
-        <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <Header />
         <main style={{ minHeight: 'calc(100vh - 72px)' }}>
           {children}
         </main>
@@ -88,9 +88,10 @@ export const AppContent: React.FC = () => {
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         
         {/* Fallback routes */}
-        <Route path="/clients" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>클라이언트 목록</h2></div></ProtectedRoute>} />
+        <Route path="/clients" element={<ProtectedRoute><ClientManagement /></ProtectedRoute>} />
+        <Route path="/clients/:clientId" element={<ProtectedRoute><ClientManagement /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><div style={{ padding: '32px' }}><h2>설정 (준비 중)</h2></div></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </LayoutWrapper>
