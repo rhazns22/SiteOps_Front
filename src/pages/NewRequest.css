@@ -1,6 +1,6 @@
 .new-request-container {
   padding: 32px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   min-height: calc(100vh - 72px);
   display: flex;
@@ -19,6 +19,9 @@
   font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .step-indicator-wrapper {
@@ -26,7 +29,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .step-node {
@@ -119,6 +122,11 @@
   gap: 8px;
   cursor: pointer;
   background-color: var(--background);
+  transition: background-color 0.2s;
+}
+
+.file-uploader:hover {
+  background-color: #F8FAFC;
 }
 
 .file-uploader svg {
@@ -136,132 +144,244 @@
   color: var(--text-muted) !important;
 }
 
-/* Step 2 Interactive placement viewports */
+/* Step 2 Layout */
 .step-two-layout {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 340px;
   gap: 24px;
+  align-items: start;
 }
 
 .preview-panel {
   background-color: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid #E7ECE9;
   border-radius: 12px;
   padding: 24px;
+}
+
+.preview-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
 
 .panel-title {
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin: 0;
 }
 
-.preview-container {
+.btn-replace-image {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background-color: var(--surface);
   border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-replace-image:hover {
+  background-color: #F8FAFC;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.preview-browser-frame {
+  border: 1px solid #E7ECE9;
   border-radius: 8px;
   overflow: hidden;
-  background-color: var(--background);
-  cursor: crosshair;
+  background-color: #F8FAF8;
 }
 
 .browser-topbar {
   height: 32px;
-  background-color: #f1f3f2;
-  border-bottom: 1px solid var(--border);
+  background-color: #F1F3F2;
+  border-bottom: 1px solid #E7ECE9;
   display: flex;
   align-items: center;
   padding: 0 12px;
-  gap: 4px;
+  gap: 6px;
 }
 
 .browser-dot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--text-muted);
+  width: 8px;
+  height: 8px;
+  background-color: #CBD5E1;
   border-radius: 50%;
 }
 
 .browser-url-bar {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-secondary);
   margin-left: 12px;
   background-color: var(--surface);
-  padding: 2px 20px;
+  padding: 2px 16px;
   border-radius: 4px;
+  border: 1px solid #E2E8F0;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.interactive-page-preview {
-  height: 320px;
-  background-color: #2b2520; /* Matching preview backdrop in ChatGPT Image 2026년 8월 14일 오전 03_52_04.png */
+/* Position Image Stage */
+.position-image-stage {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--surface);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #0F172A;
+  min-height: 200px;
+}
+
+.position-image-stage img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
   user-select: none;
+  cursor: crosshair;
 }
 
-.overlay-elements {
-  text-align: center;
+.no-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
-.overlay-elements h4 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.preview-cta-btn {
-  background-color: var(--primary);
-  color: var(--surface);
-  padding: 6px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 4px;
-  margin-top: 12px;
-}
-
+/* Interactive Pin Nodes */
 .interactive-pin-node {
   position: absolute;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
+  z-index: 10;
+  outline: none;
+}
+
+.interactive-pin-node:active {
+  cursor: grabbing;
 }
 
 .pin-circle {
-  width: 24px;
-  height: 24px;
-  background-color: var(--primary);
-  border: 2px solid var(--surface);
+  width: 28px;
+  height: 28px;
+  background-color: #07844E;
+  border: 2px solid #FFFFFF;
   border-radius: 50%;
-  color: var(--surface);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.15s ease-in-out;
 }
 
-.pin-tooltip {
-  display: none;
+.interactive-pin-node.selected .pin-circle {
+  background-color: #07844E;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(7, 132, 78, 0.4), 0 4px 12px rgba(0, 0, 0, 0.35);
+  transform: scale(1.1);
+}
+
+/* Pin Popover */
+.pin-popover {
   position: absolute;
-  left: 28px;
-  background-color: var(--surface);
+  left: 36px;
+  top: -10px;
+  width: 260px;
+  background-color: #FFFFFF;
+  border: 1px solid #E7ECE9;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-primary);
-  border-radius: 4px;
-  padding: 4px 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-delete-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #D92D20;
   font-size: 11px;
   font-weight: 600;
-  white-space: nowrap;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.interactive-pin-node:hover .pin-tooltip {
-  display: block;
+.btn-delete-pin:hover {
+  background-color: #FEE4E2;
+}
+
+.pin-popover textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 12px;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  resize: vertical;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.pin-popover textarea:focus {
+  border-color: #07844E;
+}
+
+.popover-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.char-count {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.btn-popover-save {
+  background-color: #07844E;
+  color: #FFFFFF;
+  border: none;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-popover-save:hover {
+  background-color: #05683D;
 }
 
 .preview-hint {
@@ -273,38 +393,87 @@
 /* Pin List Panel */
 .pin-list-panel {
   background-color: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid #E7ECE9;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
+}
+
+.panel-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pin-count-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #07844E;
+  background-color: #E8F5E9;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.empty-pins {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  border: 1px dashed #E2E8F0;
+  border-radius: 8px;
 }
 
 .pin-items {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .pin-list-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--border);
+  gap: 10px;
+  padding: 10px 12px;
+  min-height: 56px;
+  border: 1px solid #E7ECE9;
   border-radius: 8px;
-  background-color: var(--background);
+  background-color: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pin-list-item:hover {
+  border-color: #CBD5E1;
+  background-color: #F8FAFC;
+}
+
+.pin-list-item.selected {
+  border-color: #07844E;
+  background-color: #F0FDF4;
 }
 
 .pin-badge {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background-color: var(--primary);
-  color: var(--surface);
+  background-color: #07844E;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
 }
 
 .pin-edit-input {
@@ -314,6 +483,36 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
+  outline: none;
+}
+
+.pin-edit-input:focus {
+  background-color: #FFFFFF;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.pin-coords {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.btn-icon-delete {
+  background: none;
+  border: none;
+  color: #98A2B3;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-icon-delete:hover {
+  color: #D92D20;
+  background-color: #FEE4E2;
 }
 
 /* Step 3 Styles */

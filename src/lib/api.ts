@@ -338,6 +338,25 @@ export const requestApi = {
   async addPin(requestId: string, pin: { xPercent: number; yPercent: number; content: string; sortOrder?: number }) {
     const { data } = await api.post<ApiRequest>(`/requests/${requestId}/pins`, pin);
     return data;
+  },
+  async updatePin(
+    requestId: string,
+    pinId: string,
+    pin: { xPercent?: number; yPercent?: number; content?: string }
+  ) {
+    const { data } = await api.patch<{
+      id: string;
+      requestId: string;
+      xPercent: number;
+      yPercent: number;
+      content: string;
+      sortOrder: number;
+      createdAt: string;
+    }>(`/requests/${requestId}/pins/${pinId}`, pin);
+    return data;
+  },
+  async deletePin(requestId: string, pinId: string) {
+    await api.delete(`/requests/${requestId}/pins/${pinId}`);
   }
 };
 
