@@ -112,8 +112,10 @@ export const NewRequest: React.FC = () => {
     }
   };
 
-  // Image click to add new pin
+  // Image click to add new pin (ONLY when directly clicking on the <img> element)
   const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    if (e.target !== imgRef.current) return;
+
     if (isDraggingRef.current) {
       isDraggingRef.current = false;
       return;
@@ -226,8 +228,12 @@ export const NewRequest: React.FC = () => {
     target.addEventListener('pointerup', handlePointerUp);
   };
 
-  // Keyboard Nudging for Selected Pin
+  // Keyboard Nudging for Selected Pin (Only when focus is NOT inside an input or textarea)
   const handleKeyDownPin = (e: React.KeyboardEvent, pinId: string) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
+
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
       e.preventDefault();
       const stepSize = e.shiftKey ? 2 : 0.5;
